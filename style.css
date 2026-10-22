@@ -1,0 +1,1263 @@
+@font-face {
+  font-family: "Mario Bros";
+  src: url("./super-mario-bros-nes.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "KiwiSoda";
+  src: url("./kiwisoda.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  --bg: #2a2a2a;
+  --surface: #333333;
+  --panel: #2d2d2d;
+  --field: #3b3b3b;
+  --muted: #9a9a9a;
+  --text: #e8e8e8;
+  --btn-bg: #3d3d3d;
+  --btn-text: #e8e8e8;
+  --btn-border: #4a4a4a;
+  --danger: #b8131c;
+  --danger-dark: #8d0f16;
+}
+
+* { box-sizing: border-box; }
+
+button, input, select, textarea, label.btn {
+  font-family: "Mario Bros", "Noto Sans", sans-serif;
+  letter-spacing: 1px;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Mario Bros", "Noto Sans", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+.main {
+  max-width: 100%;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.screen-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid var(--btn-border);
+  border-radius: 8px;
+  padding: 8px;
+  order: 1;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+}
+
+.game-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  width: 100%;
+}
+
+.warp-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--btn-border);
+  border-radius: 10px;
+}
+
+.warp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.warp-section + .warp-section {
+  padding-top: 12px;
+  border-top: 1px solid var(--btn-border);
+}
+
+.warp-section h2 {
+  margin: 0 0 2px;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.warp-section label {
+  font-size: 11px;
+  color: var(--text);
+}
+
+.warp-input,
+.warp-select {
+  width: 100%;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--btn-border);
+  border-radius: 7px;
+  background: var(--field);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.oneup-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.oneup-toggle input {
+  accent-color: #e65252;
+}
+
+.oneup-range {
+  width: 100%;
+  accent-color: #e65252;
+}
+
+.mod-details {
+  padding: 9px 0;
+  border-top: 1px solid var(--btn-border);
+  font-size: 11px;
+}
+
+.mod-details summary {
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.mod-details[open] summary { margin-bottom: 10px; }
+
+.mod-details label:not(.mod-toggle) {
+  display: block;
+  margin: 8px 0 5px;
+}
+
+.mod-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 8px 0;
+}
+
+.mod-toggle input { accent-color: #e65252; }
+
+.warp-panel .btn {
+  width: 100%;
+  padding: 8px 6px;
+  font-size: 11px;
+}
+
+.warp-status {
+  min-height: 2.4em;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.game-stage {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-toolbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  max-width: min(100%, calc((90vh - 60px) * (4 / 3)));
+}
+
+.game-toolbar #btn-restart-game {
+  margin-left: auto;
+}
+
+.controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: min(100%, calc((90vh - 60px) * (4 / 3)));
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--btn-border);
+  border-radius: 10px;
+}
+
+.controls-panel[hidden] { display: none; }
+
+.controls-panel-head,
+.controls-panel-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#controls-message { color: var(--muted); font-size: 12px; }
+
+.control-bindings {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.control-binding { min-width: 0; }
+
+.ai-chat {
+  width: 100%;
+  max-width: min(100%, calc((90vh - 60px) * (4 / 3)));
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--btn-border);
+  border-radius: 10px;
+}
+
+.ai-chat[hidden] { display: none; }
+
+.ai-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 190px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.ai-message {
+  max-width: 90%;
+  padding: 8px 10px;
+  border-radius: 9px;
+  font: 13px/1.45 system-ui, sans-serif;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ai-message.user {
+  align-self: flex-end;
+  background: #9e2929;
+  color: #fff;
+}
+
+.ai-message.assistant {
+  align-self: flex-start;
+  background: var(--field);
+  color: var(--text);
+}
+
+.ai-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.ai-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--btn-border);
+  border-radius: 8px;
+  background: var(--field);
+  color: var(--text);
+  font: 14px system-ui, sans-serif;
+}
+
+.ai-form .btn { padding: 8px 12px; }
+
+canvas#screen {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  height: auto;
+  max-width: min(100%, calc((90vh - 60px) * (4 / 3)));
+  max-height: 90vh;
+  object-fit: contain;
+  background: #000000;
+  border-radius: 12px;
+  display: block;
+  margin: 0 auto;
+  border: 1px solid #111111;
+}
+
+.game-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  margin-top: 0;
+}
+
+#game-search {
+  height: 32px;
+  padding: 6px 8px;
+  width: 160px;
+}
+
+.game-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: 1px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  width: 200px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  text-align: center;
+  font-family: "Mario Bros", "Noto Sans", sans-serif;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 900px;
+  margin-top: 12px;
+  position: relative;
+  z-index: 10;
+  order: 2;
+}
+
+.controls-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+#corruption-controls[hidden],
+#play-controls[hidden],
+#game-controls[hidden],
+#raw-ram-controls[hidden],
+#warp-status[hidden],
+.status[hidden] {
+  display: none !important;
+}
+
+.control-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--btn-border);
+  border-radius: 10px;
+  position: relative;
+}
+
+.group-label {
+  position: absolute;
+  top: -9px;
+  left: 12px;
+  background: var(--surface);
+  color: var(--muted);
+  padding: 0 6px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-family: "Mario Bros", sans-serif;
+}
+
+.volume {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100px;
+}
+
+.timewarp-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.timewarp-control input {
+  width: 112px;
+  accent-color: #d03a3a;
+}
+
+.timewarp-control output {
+  min-width: 34px;
+  font-variant-numeric: tabular-nums;
+}
+
+.btn {
+  appearance: none;
+  border: 2px solid #a81d1d;
+  background: linear-gradient(180deg, #f08a88 0%, #e65252 18%, #d03a3a 55%, #c22626 100%);
+  color: #3a0a0a;
+  font-weight: bold;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: "Mario Bros", "Noto Sans", sans-serif;
+  letter-spacing: 1.5px;
+  box-shadow: 0 4px 0 #a81d1d, inset 0 2px 3px rgba(255,255,255,0.4);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+  transition: transform 60ms ease, box-shadow 60ms ease, background 120ms ease;
+}
+
+.btn:hover {
+  background: linear-gradient(180deg, #ff9d9b 0%, #ee5a58 18%, #d84444 55%, #cc3a3a 100%);
+  border-color: #c22626;
+}
+
+.btn:active {
+  box-shadow: 0 1px 0 #a81d1d, inset 0 2px 3px rgba(255,255,255,0.3);
+  transform: translateY(3px);
+}
+
+.volume {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+input[type="range"] {
+  accent-color: var(--text);
+}
+
+.auto-corrupt-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status {
+  margin-left: 0;
+  font-size: 12px;
+}
+
+.corruption-controls-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--surface);
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--btn-border);
+}
+
+.corruption-controls-group select,
+.corruption-controls-group input {
+  background: var(--field);
+  color: var(--btn-text);
+  border-color: var(--btn-border);
+}
+
+#corruption-type {
+  appearance: auto;
+  -webkit-appearance: auto;
+  -moz-appearance: auto;
+  border-radius: 8px;
+  box-shadow: none;
+  padding: 8px 10px;
+  min-width: 180px;
+  max-width: 100%;
+  font-size: 13px;
+  font-family: "Mario Bros", "Noto Sans", sans-serif;
+}
+#corruption-type option,
+#corruption-type optgroup {
+  font-family: "Mario Bros", "Noto Sans", sans-serif;
+  background: var(--field);
+  color: var(--text);
+}
+
+.corruption-info {
+  font-size: 10px;
+  max-width: 200px;
+  background: var(--field);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 6px;
+  line-height: 1.2;
+  border-left: 3px solid var(--btn-border);
+  font-family: "Mario Bros", sans-serif;
+}
+
+.editor-toggle-wrap {
+  margin-top: 8px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* CRT scanline effect — scoped to the game screen only */
+.screen-frame {
+  position: relative;
+  width: 100%;
+  max-width: min(100%, calc((90vh - 60px) * (4 / 3)));
+  max-height: 90vh;
+  line-height: 0;
+}
+.performance-overlay {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 6;
+  display: flex;
+  gap: 6px;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
+.performance-overlay .fps-badge {
+  padding: 5px 8px;
+  border-color: rgba(255,255,255,0.2);
+  background: rgba(0,0,0,0.72);
+  color: #fff;
+  font-size: 11px;
+  backdrop-filter: blur(3px);
+}
+
+.screen-frame Canvas,
+.screen-frame canvas {
+  width: 100%;
+  height: auto;
+}
+.screen-frame:fullscreen {
+  display: grid;
+  place-items: center;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  overflow: hidden;
+  background: #000;
+}
+.screen-frame:fullscreen canvas {
+  width: min(100vw, 133.333vh);
+  height: min(100vh, 75vw);
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+}
+#btn-macros {
+  padding: 6px 9px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  border-radius: 8px;
+  box-shadow: 0 3px 0 #a81d1d, inset 0 2px 3px rgba(255,255,255,0.4);
+}
+.screen-frame.crt canvas {
+  filter: contrast(1.09) brightness(1.03) saturate(1.22)
+          drop-shadow(0 2px 18px rgba(0, 120, 255, 0.28))
+          drop-shadow(0 0 34px rgba(255, 40, 120, 0.18));
+}
+.screen-frame.crt {
+  overflow: hidden;
+}
+/* Slowly moving scanlines (kept inside the screen bounds) */
+.screen-frame.crt::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(10, 24, 34, 0) 0px,
+    rgba(10, 24, 34, 0) 3px,
+    rgba(12, 30, 44, 0.5) 3px,
+    rgba(12, 30, 44, 0.5) 5px
+  );
+  background-size: 100% 88px;
+  background-repeat: repeat;
+  animation: crt-scroll 10s linear infinite;
+}
+/* Faint refresh band slowly sweeping downward + color fringing overlay */
+.screen-frame.crt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  background:
+    linear-gradient(to right, rgba(255,60,80,0.05), rgba(140,60,255,0.05) 30%, rgba(60,120,255,0.06) 50%, rgba(80,255,180,0.05) 80%, rgba(255,80,120,0.05)),
+    radial-gradient(ellipse at center, rgba(0,64,110,0.10) 0%, rgba(120,20,60,0.10) 45%, rgba(0,0,0,0.42) 100%);
+  mix-blend-mode: screen;
+}
+.screen-frame.crt .crt-sweep {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -25%;
+  height: 25%;
+  pointer-events: none;
+  z-index: 7;
+  background: linear-gradient(to bottom, transparent, rgba(150, 220, 255, 0.10) 50%, transparent);
+  animation: crt-sweep 4s linear infinite;
+}
+
+@keyframes crt-scroll {
+  from { background-position: 0 0; }
+  to   { background-position: 0 88px; }
+}
+@keyframes crt-sweep {
+  0%   { top: -25%; }
+  100% { top: 115%; }
+}
+
+/* Game Boy LCD look — green monochrome screen */
+.screen-frame.gameboy canvas {
+  filter: grayscale(1) contrast(1.35) brightness(0.92)
+          sepia(1) saturate(2.6) hue-rotate(45deg);
+  image-rendering: pixelated;
+}
+.screen-frame.gameboy {
+  overflow: hidden;
+}
+/* Subtle LCD dot-matrix grid */
+.screen-frame.gameboy::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(40, 70, 30, 0.18) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+/* Soft green vignette to mimic the GB screen glass */
+.screen-frame.gameboy::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(20, 40, 15, 0.35) 100%);
+}
+
+/* ===== Game Boy console theme — restyles the whole UI ===== */
+body.gameboy {
+  --bg: #b6b6b6;
+  --surface: #a9a9a9;
+  --panel: #9e9e9e;
+  --field: #c4c4c4;
+  --muted: #5a5a5a;
+  --text: #2b2b2b;
+  --btn-bg: #4a4a4a;
+  --btn-text: #e2e2e2;
+  --btn-border: #6a6a6a;
+  background: linear-gradient(180deg, #c2c2c2 0%, #a8a8a8 60%, #9a9a9a 100%);
+}
+body.gameboy .screen-wrap {
+  background: #6b6b6b;
+  border-color: #555555;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 6px #7d7d7d, inset 0 0 0 8px #5f5f5f, 0 6px 14px rgba(0,0,0,0.35);
+}
+body.gameboy canvas#screen {
+  border-color: #3a3a3a;
+  border-radius: 6px;
+}
+body.gameboy .control-group {
+  background: #ababab;
+  border-color: #8a8a8a;
+  border-radius: 12px;
+}
+body.gameboy .group-label {
+  background: #ababab;
+  color: #4a4a4a;
+}
+body.gameboy .btn,
+body.gameboy .game-btn,
+body.gameboy .updates-btn {
+  border: 2px solid #3a3a3a;
+  background: linear-gradient(180deg, #5c5c5c 0%, #464646 55%, #3a3a3a 100%);
+  color: #e6e6e6;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+  box-shadow: 0 4px 0 #2a2a2a, inset 0 2px 3px rgba(255,255,255,0.18);
+  border-radius: 12px;
+}
+body.gameboy .btn:hover,
+body.gameboy .game-btn:hover,
+body.gameboy .updates-btn:hover {
+  background: linear-gradient(180deg, #6a6a6a 0%, #505050 55%, #444444 100%);
+  border-color: #333333;
+}
+body.gameboy .btn:active,
+body.gameboy .game-btn:active {
+  box-shadow: 0 1px 0 #2a2a2a, inset 0 2px 3px rgba(255,255,255,0.12);
+  transform: translateY(3px);
+}
+body.gameboy .corrupt-btn {
+  background: linear-gradient(180deg, #d33a3a 0%, #a81d1d 55%, #8f1616 100%);
+  border-color: #6f1010;
+  color: #fff;
+  box-shadow: 0 4px 0 #5a0c0c, inset 0 2px 3px rgba(255,255,255,0.25);
+}
+body.gameboy .corrupt-btn:hover {
+  background: linear-gradient(180deg, #e04444 0%, #b62222 55%, #9a1a1a 100%);
+}
+body.gameboy .corrupt-btn.active-corrupt {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+}
+body.gameboy .fps-badge {
+  background: #c9c9c9;
+  color: #333;
+  border-color: #9a9a9a;
+}
+body.gameboy .quote-card {
+  background: #ababab;
+  border-color: #8a8a8a;
+}
+body.gameboy .tutorial-card {
+  background: linear-gradient(180deg, #b0b0b0 0%, #9a9a9a 100%);
+  color: #2b2b2b;
+  border-color: #8a8a8a;
+  box-shadow: 0 4px 0 #777777;
+}
+body.gameboy .mem-editor-panel { background: #6b6b6b; }
+body.gameboy #mem-hex-view { background: #c9c9c9; color: #2b2b2b; }
+body.gameboy #corruption-type,
+body.gameboy #corruption-type option,
+body.gameboy #corruption-type optgroup,
+body.gameboy #custom-corrupt-modal input.btn,
+body.gameboy #custom-corrupt-modal textarea,
+body.gameboy .corruption-info {
+  background: #c4c4c4;
+  color: #2b2b2b;
+}
+body.gameboy .m-btn {
+  border: 2px solid #3a3a3a;
+  background: linear-gradient(180deg, #5c5c5c 0%, #464646 55%, #3a3a3a 100%);
+  color: #e6e6e6;
+  box-shadow: 0 4px 0 #2a2a2a, inset 0 2px 3px rgba(255,255,255,0.18);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+}
+body.gameboy .m-btn:active,
+body.gameboy .m-btn.active {
+  background: linear-gradient(180deg, #6a6a6a 0%, #505050 55%, #444444 100%);
+  box-shadow: 0 1px 0 #2a2a2a;
+  transform: translateY(3px);
+}
+body.gameboy .mobile-controls {
+  background: linear-gradient(180deg, rgba(120,120,120,0.5) 0%, rgba(120,120,120,0.35) 100%);
+  border-color: rgba(60,60,60,0.25);
+}
+body.gameboy .credits { color: #4a4a4a; }
+
+/* Paused screen: blacked out with big white level in the Mario Bros font */
+.pause-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  color: #fff;
+  font-family: "Mario Bros", sans-serif;
+  font-size: clamp(28px, 10vw, 72px);
+  letter-spacing: 4px;
+  opacity: 0;
+}
+.pause-overlay.show {
+  display: flex;
+  opacity: 1;
+}
+
+.editor-btn {
+  font-size: 11px;
+  padding: 4px 12px;
+}
+
+.mem-editor-panel {
+  display: none;
+  width: 100%;
+  background: #222222;
+  color: #00ff00;
+  font-family: "Mario Bros", monospace;
+  border-radius: 6px;
+  margin-top: 8px;
+  padding: 8px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mem-editor-panel.show {
+  display: flex;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+}
+
+#mem-hex-view {
+  width: 100%;
+  height: 120px;
+  background: #1a1a1a;
+  color: #00ff00;
+  border: 1px solid var(--btn-border);
+  font-family: "Mario Bros", 'Courier New', Courier, monospace;
+  font-size: 12px;
+  resize: vertical;
+  padding: 4px;
+}
+
+.editor-footer {
+  font-size: 9px;
+  opacity: 0.7;
+}
+
+.fps-badge {
+  font-family: "Mario Bros", monospace;
+  background: var(--btn-bg);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+  border: 1px solid var(--btn-border);
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Mobile Controls */
+.mobile-controls {
+  position: fixed;
+  top: 50%;
+  right: calc(10px + env(safe-area-inset-right, 0px));
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 12px 10px;
+  user-select: none;
+  touch-action: none;
+  background: linear-gradient(180deg, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.18) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  z-index: 25;
+  pointer-events: auto;
+  transition: transform 300ms ease, opacity 300ms ease;
+}
+
+.mobile-controls.hidden {
+  transform: translateY(-50%) translateX(130%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .help { display: none; }
+  .main { padding: 8px 4px; }
+  .screen-wrap { padding: 6px; width: 100%; border-radius: 4px; }
+  .game-layout { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .warp-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .warp-section + .warp-section { padding-top: 0; border-top: 0; }
+  .warp-status, .mod-details { grid-column: 1 / -1; }
+  .game-stage { width: 100%; }
+  .controls {
+    justify-content: center;
+    padding-bottom: 8px;
+  }
+  canvas#screen {
+    width: 100%;
+    height: auto;
+    max-width: min(100%, calc((75vh - 20px) * (4 / 3)));
+    max-height: 75vh;
+  }
+  .mobile-controls {
+    inset: 0;
+    top: 0;
+    right: 0;
+    transform: none;
+    display: block;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    pointer-events: none;
+    transition: opacity 300ms ease;
+  }
+  .mobile-controls.hidden { transform: none; }
+  .dpad {
+    position: absolute;
+    left: max(12px, env(safe-area-inset-left, 0px));
+    bottom: max(18px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+  }
+  .action-btns {
+    position: absolute;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: max(54px, calc(env(safe-area-inset-bottom, 0px) + 48px));
+    align-items: center;
+    gap: 8px;
+  }
+  .center-btns {
+    position: absolute;
+    left: 50%;
+    bottom: max(18px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+    transform: translateX(-50%);
+  }
+}
+
+.dpad {
+  display: grid;
+  grid-template-areas:
+    ". up ."
+    "left . right"
+    ". down .";
+  gap: 6px;
+}
+.m-btn.up { grid-area: up; }
+.m-btn.left { grid-area: left; }
+.m-btn.right { grid-area: right; }
+.m-btn.down { grid-area: down; }
+
+.center-btns {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btns {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.shoulder-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.m-btn.s-btn {
+  width: 46px;
+  height: 28px;
+  border-radius: 46%;
+  font-size: 12px;
+  background: linear-gradient(180deg, #f08a88 0%, #e65252 18%, #d03a3a 55%, #c22626 100%);
+  border: 2px solid #a81d1d;
+  color: #3a0a0a;
+  box-shadow: 0 3px 0 #a81d1d, inset 0 2px 3px rgba(255,255,255,0.4);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+  letter-spacing: 0.5px;
+}
+
+.m-btn {
+  width: 54px;
+  height: 54px;
+  border-radius: 34%;
+  border: 2px solid #a81d1d;
+  background: linear-gradient(180deg, #f08a88 0%, #e65252 18%, #d03a3a 55%, #c22626 100%);
+  color: #3a0a0a;
+  font-weight: bold;
+  font-size: 18px;
+  font-family: "Mario Bros", sans-serif;
+  letter-spacing: 1.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #a81d1d, inset 0 2px 3px rgba(255,255,255,0.4);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+  -webkit-tap-highlight-color: transparent;
+  pointer-events: auto;
+}
+
+.m-btn:active, .m-btn.active {
+  background: linear-gradient(180deg, #ef7a78 0%, #df4343 30%, #c22626 100%);
+  box-shadow: 0 1px 0 #a81d1d, inset 0 2px 3px rgba(255,255,255,0.3);
+  transform: translateY(3px);
+}
+
+.m-btn.up, .m-btn.down, .m-btn.left, .m-btn.right {
+  border-radius: 38%;
+}
+
+.m-btn.select, .m-btn.start {
+  width: 74px;
+  height: 28px;
+  border-radius: 46%;
+  font-size: 11px;
+}
+
+.m-btn.a-btn, .m-btn.b-btn {
+  width: 62px;
+  height: 62px;
+  font-size: 26px;
+  border-radius: 36%;
+}
+
+.m-btn.b-btn {
+  background: linear-gradient(180deg, #e65252 0%, #c22626 100%);
+  color: #3a0a0a;
+  margin-right: 2px;
+}
+
+.m-btn.a-btn {
+  background: linear-gradient(180deg, #ef6a6a 0%, #cd3333 100%);
+  color: #3a0a0a;
+  margin-left: 4px;
+}
+
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: none;
+  place-items: center;
+  padding: 12px;
+  background: rgba(0,0,0,0.78);
+}
+.tutorial-overlay.show {
+  display: grid;
+}
+.tutorial-card {
+  color: var(--text);
+  border: 2px solid #555555;
+  background: linear-gradient(180deg, #4a4a4a 0%, #333333 100%);
+  box-shadow: 0 4px 0 #222222;
+  border-radius: 14px;
+  padding: 16px 20px;
+  max-width: 420px;
+  width: calc(100% - 24px);
+  text-align: center;
+  font-family: "Mario Bros", sans-serif;
+}
+.tutorial-card h2 {
+  margin: 10px 0 8px;
+  font-size: 18px;
+}
+.tutorial-card ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+.tutorial-card li {
+  font-size: 12px;
+  line-height: 1.7;
+  font-family: "Mario Bros", "Noto Sans", sans-serif;
+}
+.tutorial-card .btn {
+  margin-top: 12px;
+}
+
+.webboy-title {
+  order: 0;
+  margin: 4px 0 0;
+  font-family: "Mario Bros", sans-serif;
+  font-size: 34px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  background: linear-gradient(to top, #3a3a3a, #6a6a6a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 -2px 0 rgba(0,0,0,0.5), 0 2px 0 rgba(255,255,255,0.4);
+}
+
+.credits {
+  margin-top: 10px;
+  font-size: 11px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.quote-btn {
+  position: fixed; bottom: 16px; left: 16px; z-index: 20;
+  border: 2px solid #555555;
+  background: linear-gradient(180deg, #4a4a4a 0%, #333333 100%);
+  color: #ffffff; font-weight: bold;
+  padding: 10px 16px; border-radius: 999px; font-family: "Mario Bros", sans-serif;
+  letter-spacing: 1.5px;
+  box-shadow: 0 4px 0 #222222;
+  cursor: pointer;
+  transition: transform 60ms ease, box-shadow 60ms ease;
+}
+.quote-btn:active {
+  box-shadow: 0 1px 0 #222222;
+  transform: translateY(3px);
+}
+.quote-btn::before { content: "★"; margin-right: 8px; font-size: 14px; opacity: 0.9; }
+
+.corrupt-btn {
+  background: linear-gradient(180deg, #e8484f 0%, #d01c24 45%, #a31118 100%);
+  color: #fff;
+  border-color: #8d0f16;
+  box-shadow: 0 4px 0 #7a0d13, inset 0 2px 3px rgba(255,255,255,0.35);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.4);
+}
+.corrupt-btn:active {
+  box-shadow: 0 1px 0 #7a0d13, inset 0 2px 3px rgba(255,255,255,0.25);
+}
+.corrupt-btn:hover {
+  background: linear-gradient(180deg, #f25a61 0%, #dd232b 45%, #b4161d 100%);
+  border-color: #8d0f16;
+}
+.corrupt-btn::before {
+  content: "⚠";
+  margin-right: 6px;
+  font-size: 12px;
+  opacity: 0.9;
+  color: #ffd7d7;
+}
+
+.corrupt-btn.active-corrupt {
+  background: var(--btn-bg);
+  color: var(--text);
+}
+
+.updates-btn {
+  appearance: none;
+  border: 2px solid #a81d1d;
+  background: linear-gradient(180deg, #f08a88 0%, #e65252 18%, #d03a3a 55%, #c22626 100%);
+  color: #3a0a0a;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: "Mario Bros", "Noto Sans", sans-serif;
+  box-shadow: 0 4px 0 #a81d1d, inset 0 2px 3px rgba(255,255,255,0.4);
+}
+
+.updates-card h2 {
+  margin-top: 0;
+}
+
+.update-content {
+  font-size: 1.2rem;
+  margin: 20px 0;
+  font-style: italic;
+}
+
+.quote-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; place-items: center; z-index: 30; }
+.quote-overlay.show { display: grid; }
+.quote-card { background: var(--surface); color: var(--text); padding: 16px; border-radius: 10px; max-width: 640px; width: calc(100% - 32px); text-align: center; border: 1px solid var(--btn-border); }
+#grand-img { width: 100%; height: auto; opacity: 0; transition: opacity 300ms ease; border-radius: 6px; }
+#grand-img.visible { opacity: 1; }
+.quote-line { font-size: clamp(16px, 2.4vw, 22px); margin-top: 12px; }
+.quote-author { font-size: 14px; margin-top: 8px; opacity: 0.8; }
+
+#polaroid-overlay .quote-card {
+  background: #2e2a22;
+  border-color: #5a4c30;
+  max-width: 420px;
+  width: calc(100% - 24px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  padding: 20px;
+  border-radius: 8px;
+}
+#polaroid-canvas {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+  image-rendering: auto;
+}
+
+#custom-corrupt-modal .quote-card { max-width: 720px; width: calc(100% - 24px); text-align: left; }
+#custom-corrupt-modal input.btn, #custom-corrupt-modal textarea { background: var(--field); color: var(--text); border: 1px solid var(--btn-border); padding: 8px; border-radius: 6px; font-family: "Mario Bros", monospace; }
+#custom-corrupt-modal textarea { font-family: "Mario Bros", monospace; font-size: 13px; }
+
+.webboy-title,
+.editor-toggle-wrap,
+.mem-editor-panel,
+.credits,
+#tutorial-overlay,
+#updates-overlay,
+#custom-corrupt-modal {
+  display: none !important;
+}
+
+body.retro-mode {
+  --bg: #000;
+  --surface: #000;
+  --panel: #000;
+  --field: #001000;
+  --muted: #00a000;
+  --text: #00ff00;
+  --btn-bg: #001800;
+  --btn-text: #00ff00;
+  --btn-border: #087300;
+}
+
+body.retro-mode .btn,
+body.retro-mode input,
+body.retro-mode select,
+body.retro-mode textarea,
+body.retro-mode .ai-message,
+body.retro-mode .screen-wrap,
+body.retro-mode .warp-panel {
+  color: #00ff00 !important;
+  background: #000 !important;
+  border-color: #087300 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.macro-card {
+  max-width: 520px;
+  max-height: min(84vh, 760px);
+  overflow: auto;
+  text-align: left;
+}
+.macro-card h2 { text-align: center; margin: 4px 0 14px; }
+.macro-name { display: grid; gap: 6px; }
+.macro-name input { width: 100%; min-width: 0; padding: 8px; background: var(--field); color: var(--text); border: 1px solid var(--btn-border); border-radius: 6px; }
+.macro-actions, .macro-entry-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.macro-status { min-height: 20px; margin: 10px 0 4px; color: var(--muted); font: 13px/1.4 system-ui, sans-serif; }
+.macro-list { display: grid; gap: 8px; max-height: 44vh; overflow: auto; }
+.macro-entry { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 12px; padding: 10px; border: 1px solid var(--btn-border); border-radius: 8px; background: var(--panel); }
+.macro-entry-title { overflow-wrap: anywhere; }
+.macro-entry-author { display: inline-flex; align-items: center; gap: 6px; width: fit-content; color: var(--muted); font: 12px system-ui, sans-serif; text-decoration: none; }
+.macro-entry-author img { width: 20px; height: 20px; border-radius: 50%; }
+.macro-entry-actions { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
+.macro-empty { padding: 14px 4px; color: var(--muted); font: 13px system-ui, sans-serif; }
+
+@media (max-width: 520px) {
+  .macro-entry { grid-template-columns: minmax(0, 1fr); }
+  .macro-entry-actions { grid-column: 1; grid-row: auto; }
+}

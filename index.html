@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>7 grand dad emulator</title>
+  <link rel="stylesheet" href="./style.css" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Comic Sans is not a web font; use system fallback 'Comic Sans MS' -->
+  <meta name="color-scheme" content="light dark">
+  <script type="importmap">
+  {
+    "imports": {
+      "jsnes": "https://esm.sh/jsnes@1.1.0?bundle",
+      "parse-torrent": "https://esm.sh/parse-torrent@9.0.0?bundle",
+      "buffer": "https://esm.sh/buffer@6.0.3?bundle",
+      "jszip": "https://esm.sh/jszip@3.10.1"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <main class="main">
+    <div class="webboy-title">webboy</div>
+    <section class="controls" style="position: relative; z-index: 10;">
+
+      <div class="status" id="status" role="status" aria-live="polite" hidden>Ready</div>
+
+      <div id="play-controls" class="control-group" hidden>
+        <span class="group-label">Play</span>
+        <button id="btn-start" class="btn" type="button">Start</button>
+        <button id="btn-pause" class="btn" type="button">Pause</button>
+        <button id="btn-reset" class="btn" type="button">Reset</button>
+        <button id="btn-reset-game" class="btn" type="button">Reset Game</button>
+        <button id="btn-mute" class="btn" type="button">Mute</button>
+        <button id="btn-crt" class="btn" type="button">CRT: Off</button>
+        <button id="btn-gameboy" class="btn" type="button">Game Boy: Off</button>
+        <button id="btn-polaroid" class="btn polaroid-btn" type="button">Screenshot</button>
+        <button id="btn-polaroid-filter" class="btn" type="button">Filter: On</button>
+        <label class="volume">
+          <input id="volume" type="range" min="0" max="1" step="0.01" value="0.6" title="Volume" />
+        </label>
+      </div>
+
+      <div id="game-controls" class="control-group" hidden>
+        <span class="group-label">Games</span>
+        <div class="game-select" id="game-select">
+          <input id="game-search" class="btn" type="search" placeholder="Search games..." />
+          <select id="btn-game-cycle" class="game-btn"></select>
+        </div>
+        <button id="btn-load-rom" class="btn" type="button">Load ROM</button>
+        <label for="rom-upload" class="btn" id="rom-upload-label" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+          Upload ROM
+          <input type="file" id="rom-upload" accept=".nes,.sfc,.smc,.snes" style="display: none;" />
+        </label>
+        <button id="btn-download-rom" class="btn" type="button" disabled>Download ROM</button>
+        <button id="btn-load-torrent" class="btn" type="button">Load Torrent</button>
+        <button id="btn-list-torrent" class="btn" type="button" style="display:none;">Show Torrent File List</button>
+      </div>
+
+      <div id="corruption-controls" class="control-group" hidden>
+        <span class="group-label">Corrupt</span>
+        <select id="corruption-type" class="btn">
+          <optgroup label="Safe / Gentle">
+            <option value="light_random">Light Random (safe)</option>
+            <option value="light_bitflip">Light BitFlip (safe)</option>
+            <option value="random">Random Bytes</option>
+            <option value="bitflip">Bit Flip</option>
+          </optgroup>
+          <optgroup label="Graphics / Assets">
+            <option value="byteswap">ByteSwap</option>
+            <option value="checkerboard">Checkerboard</option>
+            <option value="texturevomit">TextureVomit</option>
+            <option value="assetscramble">Asset Scramble</option>
+            <option value="clusterbytes">ClusterBytes</option>
+          </optgroup>
+          <optgroup label="World / Level">
+            <option value="worldlevel">World Level Changer</option>
+            <option value="blockscramble">Block Scrambler</option>
+            <option value="levelscrambler">Level Scrambler</option>
+            <option value="powerupscramble">Power-up Scrambler</option>
+            <option value="enemyscramble">Enemy Scrambler</option>
+          </optgroup>
+          <optgroup label="Audio / Music">
+            <option value="music">Music Corruptor</option>
+            <option value="musicswap">Music Swapper</option>
+          </optgroup>
+          <optgroup label="Logic / Behavior">
+            <option value="swapper">Swapper Corruptor</option>
+            <option value="numberscramble">Number Scramble</option>
+            <option value="logicscramble">Logic Scramble</option>
+          </optgroup>
+          <optgroup label="Bitwise / Math">
+            <option value="xor">XOR Corruption</option>
+            <option value="or">OR Corruption</option>
+            <option value="and">AND Corruption</option>
+            <option value="nand">NAND Corruption</option>
+            <option value="not">NOT Corruption</option>
+            <option value="binaryswap">Binary Swap</option>
+            <option value="completebinaryswap">Complete Binary Swap</option>
+            <option value="everybyte">EveryByte</option>
+            <option value="scramble">Scramble</option>
+          </optgroup>
+        </select>
+        <div id="corruption-info" class="corruption-info">Select a method to see details.</div>
+      <label class="auto-corrupt-label">
+        bytes
+        <input
+          id="corruption-amount"
+          type="number"
+          class="btn"
+          min="1"
+          max="1024"
+          value="64"
+          style="width: 70px; padding-right: 4px;"
+          aria-label="Corruption byte count"
+        />
+      </label>
+      <button id="btn-corrupt" class="btn corrupt-btn" type="button">Corrupt</button>
+      <button id="btn-corrupt-twice" class="btn corrupt-btn" type="button">Corrupt x2</button>
+      <label class="auto-corrupt-label">
+        Every
+        <input
+          id="auto-corrupt-interval"
+          type="number"
+          class="btn"
+          min="1"
+          max="120"
+          value="10"
+          style="width: 70px; padding-right: 4px;"
+          aria-label="Auto corrupt interval (seconds)"
+        />
+        sec
+      </label>
+
+      <!-- Custom Corruption Creator -->
+      <button id="btn-create-custom" class="btn" type="button">Corruption Lab</button>
+      <button id="btn-auto-corrupt" class="btn corrupt-btn" type="button">Auto Corrupt: Off</button>
+      <button id="btn-corrupt-press" class="btn corrupt-btn" type="button">CorruptWhenPress: Off</button>
+      </div>
+    </section>
+
+    <section class="screen-wrap">
+      <div class="game-layout">
+        <aside class="warp-panel" aria-label="Mario game settings">
+          <div class="warp-section">
+            <h2>Time</h2>
+            <label for="time-value">Seconds</label>
+            <input id="time-value" class="warp-input" type="number" min="0" max="999" step="1" value="300" />
+            <button id="btn-set-time" class="btn" type="button">Set Time</button>
+          </div>
+          <div class="warp-section">
+            <h2>World / Level</h2>
+            <label for="world-value">World</label>
+            <input id="world-value" class="warp-input" type="number" min="1" max="256" step="1" value="1" />
+            <label for="level-value">Level</label>
+            <input id="level-value" class="warp-input" type="number" min="1" max="256" step="1" value="1" />
+            <label for="entry-form">Enter as</label>
+            <select id="entry-form" class="warp-select">
+              <option value="small">Small Mario</option>
+              <option value="big">Big Mario</option>
+              <option value="small-fire">Small Fire Mario</option>
+              <option value="big-fire">Big Fire Mario</option>
+              <option value="star-small">Star Small Mario</option>
+              <option value="star-big">Star Big Mario</option>
+              <option value="star-small-fire">Star Fire Small Mario</option>
+              <option value="star-big-fire">Star Fire Big Mario</option>
+            </select>
+            <button id="btn-set-world-level" class="btn" type="button">Set World / Level</button>
+            <button id="btn-corrupt-level-layout" class="btn" type="button">Corrupt World + Layout</button>
+          </div>
+          <div class="warp-section">
+            <h2>Lives</h2>
+            <label for="lives-value">Lives</label>
+            <input id="lives-value" class="warp-input" type="number" min="1" max="99" step="1" value="99" />
+            <button id="btn-set-lives" class="btn" type="button">Set Lives</button>
+          </div>
+          <div class="warp-section">
+            <h2>Question Blocks</h2>
+            <label for="question-block-reward">Reward</label>
+            <select id="question-block-reward" class="warp-select">
+              <option value="default">Game default</option>
+              <option value="star">Star</option>
+              <option value="mushroom">Mushroom</option>
+              <option value="coin">Coin</option>
+              <option value="goomba">Goomba</option>
+            </select>
+            <label class="oneup-toggle" for="oneup-enabled">
+              <input id="oneup-enabled" type="checkbox" checked />
+              Chance for 1-Ups
+            </label>
+            <label for="oneup-chance">Chance <output id="oneup-chance-label">25%</output></label>
+            <input id="oneup-chance" class="oneup-range" type="range" min="0" max="100" step="1" value="25" />
+            <label for="oneup-lives">Lives per 1-Up</label>
+            <input id="oneup-lives" class="warp-input" type="number" min="1" max="9" step="1" value="1" />
+            <button id="btn-set-oneup-lives" class="btn" type="button">Set 1-Up Lives</button>
+          </div>
+          <details class="mod-details">
+            <summary>Abilities & Movement</summary>
+            <label class="mod-toggle"><input id="ability-fly" type="checkbox" /> Fly</label>
+            <label class="mod-toggle"><input id="ability-noclip" type="checkbox" /> Noclip</label>
+            <label class="mod-toggle"><input id="ability-immortal" type="checkbox" /> Immortal</label>
+            <label for="movement-mode">Movement</label>
+            <select id="movement-mode" class="warp-select">
+              <option value="default">Level default</option>
+              <option value="platformer">Platformer</option>
+              <option value="swimming">Swimming</option>
+            </select>
+            <label for="koopa-wake">Koopa wake-up (ticks)</label>
+            <input id="koopa-wake" class="warp-input" type="number" min="0" max="255" value="16" />
+            <button id="btn-set-koopa-wake" class="btn" type="button">Set Wake Time</button>
+          </details>
+          <details class="mod-details">
+            <summary>Game Mods</summary>
+            <label for="coins-value">Coins</label>
+            <input id="coins-value" class="warp-input" type="number" min="0" max="99" value="0" />
+            <button id="btn-set-coins" class="btn" type="button">Set Coins</button>
+            <label class="mod-toggle"><input id="mute-game-audio" type="checkbox" /> Mute game audio</label>
+            <label for="spawn-enemy">Summon</label>
+            <select id="spawn-enemy" class="warp-select">
+              <optgroup label="Enemies">
+                <option value="goomba">Goomba</option><option value="koopa">Green Koopa Troopa</option><option value="red-koopa">Red Koopa Troopa</option>
+                <option value="green-paratroopa">Green Koopa Paratroopa</option><option value="red-paratroopa">Red Koopa Paratroopa</option>
+                <option value="buzzy-beetle">Buzzy Beetle</option><option value="spiny">Spiny</option><option value="spiny-egg">Spiny Egg</option>
+                <option value="piranha-plant">Piranha Plant</option><option value="lakitu">Lakitu</option>
+                <option value="bowser">Bowser</option><option value="bowser-flame">Bowser's Flame</option><option value="bulletbill">Bullet Bill</option>
+                <option value="green-cheep-cheep">Green Cheep-Cheep</option><option value="red-cheep-cheep">Red Cheep-Cheep</option>
+                <option value="hammer-bro">Hammer Bro</option><option value="podoboo">Podoboo</option>
+              </optgroup>
+              <optgroup label="Other">
+                <option value="mushroom">Mushroom</option><option value="1up">1-Up</option><option value="coin">Coin</option>
+                <option value="star">Star</option><option value="fire-flower">Fire Flower</option><option value="hammer">Hammer projectile</option>
+                <option value="firebar">Firebar</option><option value="pipe">Pipe</option>
+              </optgroup>
+            </select>
+            <button id="btn-spawn-enemy" class="btn" type="button">Summon</button>
+            <label for="score-value">Score</label><input id="score-value" class="warp-input" type="number" min="0" max="999999" value="0" />
+            <button id="btn-set-score" class="btn" type="button">Set Score</button>
+            <label for="speed-value">Game speed</label><input id="speed-value" class="warp-input" type="number" min="0.1" max="20" step="0.1" value="1" />
+            <button id="btn-set-speed" class="btn" type="button">Set Speed</button>
+            <label for="jump-height">Jump height</label><input id="jump-height" class="warp-input" type="number" min="0.5" max="2" step="0.1" value="1" />
+            <button id="btn-set-jump" class="btn" type="button">Set Jump</button>
+            <label for="game-theme">Theme</label><select id="game-theme" class="warp-select"><option value="classic">Classic</option><option value="underground">Underground</option><option value="underwater">Underwater</option><option value="sunset">Sunset</option></select>
+            <label class="mod-toggle"><input id="retro-mode" type="checkbox" /> Retro green &amp; black</label>
+            <label for="bg-music">Background music</label><select id="bg-music" class="warp-select"><option value="overworld">Overworld</option><option value="underground">Underground</option><option value="underwater">Underwater</option><option value="castle">Castle</option><option value="silence">Silence</option></select>
+            <label for="warp-target">Pipe warp world (memory)</label><input id="warp-target" class="warp-input" type="number" min="1" max="256" value="1" />
+            <label class="mod-toggle"><input id="warp-all-pipes" type="checkbox" /> Make pipes warp here</label>
+          </details>
+          <details class="mod-details">
+            <summary>Asset Corruption</summary>
+            <button id="btn-corrupt-textures" class="btn" type="button">Corrupt Textures</button>
+            <button id="btn-corrupt-palette" class="btn" type="button">Corrupt Palette</button>
+            <button id="btn-corrupt-audio" class="btn" type="button">Corrupt Audio</button>
+            <button id="btn-scramble-chr" class="btn" type="button">Scramble CHR Tiles</button>
+            <button id="btn-glitch-tile-map" class="btn" type="button">Glitch Tile Map</button>
+            <button id="btn-corrupt-bg-palette" class="btn" type="button">Corrupt Background Palette</button>
+            <button id="btn-corrupt-sprite-palette" class="btn" type="button">Corrupt Sprite Palette</button>
+          </details>
+          <details class="mod-details">
+            <summary>Sprite Look</summary>
+            <label for="sprite-color">Sprite color</label>
+            <select id="sprite-color" class="warp-select">
+              <option value="default">Original</option>
+              <option value="red">Red</option>
+              <option value="orange">Orange</option>
+              <option value="yellow">Yellow</option>
+              <option value="green">Green</option>
+              <option value="cyan">Cyan</option>
+              <option value="blue">Blue</option>
+              <option value="purple">Purple</option>
+              <option value="white">White</option>
+            </select>
+            <label for="sprite-texture">Sprite texture</label>
+            <select id="sprite-texture" class="warp-select">
+              <option value="normal">Original</option>
+              <option value="mirror">Mirrored</option>
+              <option value="glitch">Glitch</option>
+            </select>
+          </details>
+          <details id="raw-ram-controls" class="mod-details" hidden>
+            <summary>Raw RAM</summary>
+            <label for="raw-address">CPU RAM address (hex)</label>
+            <input id="raw-address" class="warp-input" type="text" value="0x075E" />
+            <label for="raw-value">Byte value (0-255)</label>
+            <input id="raw-value" class="warp-input" type="number" min="0" max="255" value="0" />
+            <button id="btn-write-ram" class="btn" type="button">Write Byte</button>
+          </details>
+          <div id="warp-status" class="warp-status" role="status" aria-live="polite" hidden></div>
+        </aside>
+        <div class="game-stage">
+          <div class="game-toolbar">
+            <label class="timewarp-control" for="timewarp-speed">
+              Timewarp <input id="timewarp-speed" type="range" min="0.1" max="20" step="0.1" value="1" />
+              <output id="timewarp-speed-label" for="timewarp-speed">1.0x</output>
+            </label>
+            <button id="btn-toggle-bottom-controls" class="btn" type="button">Mobile Controls: Off</button>
+            <button id="btn-restart-game" class="btn" type="button">Reset Game</button>
+            <button id="btn-fullscreen" class="btn" type="button">Fullscreen</button>
+            <button id="btn-macros" class="btn" type="button">Macros</button>
+            <button id="btn-ai-toggle" class="btn" type="button" aria-expanded="false">Ask AI</button>
+            <button id="btn-change-controls" class="btn" type="button" aria-expanded="false">Change Controls</button>
+          </div>
+          <section id="controls-panel" class="controls-panel" aria-label="Change game controls" hidden>
+            <div class="controls-panel-head">
+              <strong>Controls</strong>
+              <span id="controls-message" aria-live="polite">Select a button, then press a key.</span>
+            </div>
+            <div class="control-bindings">
+              <button class="btn control-binding" data-control="UP" type="button">Up</button>
+              <button class="btn control-binding" data-control="DOWN" type="button">Down</button>
+              <button class="btn control-binding" data-control="LEFT" type="button">Left</button>
+              <button class="btn control-binding" data-control="RIGHT" type="button">Right</button>
+              <button class="btn control-binding" data-control="A" type="button">A</button>
+              <button class="btn control-binding" data-control="B" type="button">B</button>
+              <button class="btn control-binding" data-control="START" type="button">Start</button>
+              <button class="btn control-binding" data-control="SELECT" type="button">Select</button>
+            </div>
+            <div class="controls-panel-actions">
+              <button id="btn-reset-controls" class="btn" type="button">Reset Defaults</button>
+              <button id="btn-close-controls" class="btn" type="button">Close</button>
+            </div>
+          </section>
+          <div class="screen-frame">
+            <div class="performance-overlay" aria-label="Emulator performance">
+              <div class="fps-badge" id="fps-counter">FPS: 0</div>
+              <div class="fps-badge" id="cps-counter">CPS: 0</div>
+              <div class="fps-badge" id="sps-counter">SPS: 0.00</div>
+            </div>
+            <canvas id="screen" width="256" height="240" aria-label="Game screen"></canvas>
+            <div class="crt-sweep" aria-hidden="true"></div>
+            <div class="pause-overlay" id="pause-overlay" aria-hidden="true">PAUSED</div>
+          </div>
+          <section id="ai-chat" class="ai-chat" aria-label="Game AI chat" hidden>
+            <div id="ai-messages" class="ai-messages" aria-live="polite"></div>
+            <form id="ai-form" class="ai-form">
+              <input id="ai-input" type="text" autocomplete="off" placeholder="Ask for a game change..." aria-label="Ask the game AI" />
+              <button id="ai-send" class="btn" type="submit">Send</button>
+            </form>
+          </section>
+          <div class="editor-toggle-wrap">
+            <button id="btn-toggle-editor" class="btn editor-btn">Live RAM Editor</button>
+          </div>
+          <div id="mem-editor-panel" class="mem-editor-panel">
+            <div class="editor-header">
+              <span>Live RAM View (0x0000 - 0x07FF)</span>
+            </div>
+            <textarea id="mem-hex-view" spellcheck="false" placeholder="Loading memory..."></textarea>
+            <div class="editor-footer">Edit hex values directly to corrupt the game state.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+
+    <div id="tutorial-overlay" class="tutorial-overlay" aria-hidden="true">
+      <div class="tutorial-card">
+        <h2>How to Play</h2>
+        <ul>
+          <li>WASD: D-Pad</li>
+          <li>Z: A Button</li>
+          <li>Left Shift: Sprint (B)</li>
+          <li>X / Right Shift: SELECT</li>
+          <li>Enter: START</li>
+          <li>R: Reset</li>
+          <li>F1-F4: Save / Shift + F1-F4: Load</li>
+        </ul>
+        <button id="btn-close-tutorial" class="btn">Let's corrupt</button>
+      </div>
+    </div>
+    <div id="quote-overlay" class="quote-overlay" aria-hidden="true">
+      <div class="quote-card">
+        <img id="grand-img" alt="Grand Dad" />
+        <div class="quote-line" id="quote-line"></div>
+        <div class="quote-author">-joel vargskelethor</div>
+      </div>
+    </div>
+    <div id="updates-overlay" class="quote-overlay" aria-hidden="true">
+      <div class="quote-card updates-card">
+        <h2>Creator Updates</h2>
+        <div class="update-content">
+          <ul class="updates-list" style="list-style:none; padding:0; margin:0; text-align:left;">
+            <li style="margin-bottom:10px;">Added new corruption modes and improved rewind stability.</li>
+            <li style="margin-bottom:10px;">Mobile buttons tuned and RAM editor auto-apply debounce reduced.</li>
+            <li style="margin-bottom:10px;">Audio buffer safety added to prevent glitches on slow devices.</li>
+            <li style="margin-bottom:10px;">UI polish: unified hover states and updated color palette.</li>
+          </ul>
+        </div>
+        <button id="btn-close-updates" class="btn">Close</button>
+      </div>
+    </div>
+
+    <div id="macro-overlay" class="quote-overlay" aria-hidden="true">
+      <section class="quote-card macro-card" role="dialog" aria-modal="true" aria-labelledby="macro-title">
+        <h2 id="macro-title">Macros</h2>
+        <label class="macro-name" for="macro-name">Name
+          <input id="macro-name" class="btn" type="text" maxlength="48" placeholder="My attempt" />
+        </label>
+        <div class="macro-actions">
+          <button id="btn-record-macro" class="btn" type="button">Record attempt</button>
+          <button id="btn-publish-macro" class="btn" type="button" disabled>Publish recording</button>
+          <button id="btn-close-macros" class="btn" type="button">Close</button>
+        </div>
+        <div id="macro-status" class="macro-status" role="status" aria-live="polite"></div>
+        <div id="macro-list" class="macro-list" aria-label="Published macros"></div>
+      </section>
+    </div>
+
+    <!-- Torrent file list overlay -->
+    <div id="torrent-overlay" class="quote-overlay" aria-hidden="true">
+      <div class="quote-card">
+        <h2>Torrent Contents</h2>
+        <div id="torrent-list" style="max-height:40vh; overflow:auto; text-align:left; padding:8px 0;"></div>
+        <div style="display:flex; gap:8px; justify-content:center; margin-top:12px;">
+          <button id="btn-close-torrent" class="btn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Corruption Modal -->
+    <div id="custom-corrupt-modal" class="quote-overlay" aria-hidden="true">
+      <div class="quote-card">
+        <h2>Corruption Lab</h2>
+        <label style="display:block; text-align:left; margin-top:8px;">
+          Name
+          <input id="custom-name" type="text" class="btn" placeholder="e.g. Gentle Nibble" style="width:100%; margin-top:6px;" />
+        </label>
+        <label style="display:block; text-align:left; margin-top:8px;">
+          Describe what you want
+          <textarea id="custom-desc" spellcheck="false" placeholder="e.g. slowly scramble the score and time displays" style="width:100%; margin-top:6px; height:56px;"></textarea>
+        </label>
+        <label style="display:block; text-align:left; margin-top:8px;">
+          JS Body (generated by AI; function body; params: emu, mem, count)
+          <textarea id="custom-code" spellcheck="false" placeholder="mem[0x0010] = (mem[0x0010] + 1) & 0xFF;" style="width:100%; height:140px; margin-top:6px;"></textarea>
+        </label>
+        <div style="display:flex; gap:8px; margin-top:12px; justify-content:center; flex-wrap:wrap;">
+          <button id="btn-describe-ai" class="btn corrupt-btn">Generate with AI</button>
+          <button id="btn-save-custom" class="btn">Save to cloud</button>
+          <button id="btn-cancel-custom" class="btn">Cancel</button>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:8px; justify-content:center; flex-wrap:wrap;">
+          <button id="btn-export-corruptions" class="btn">Export corruptions</button>
+          <button id="btn-import-corruptions" class="btn">Import corruptions</button>
+          <input id="corruption-import" type="file" accept=".json,application/json" style="display:none;" />
+        </div>
+        <div style="font-size:11px; opacity:0.9; margin-top:8px;">Saved custom corruptions persist in your browser and are treated as cloud entries here.</div>
+      </div>
+    </div>
+    <footer class="credits">credits to Obsolete_gaming</footer>
+  </main>
+
+  <!-- Polaroid preview -->
+  <div id="polaroid-overlay" class="quote-overlay" aria-hidden="true">
+    <div class="quote-card polaroid-card">
+      <canvas id="polaroid-canvas" width="360" height="440"></canvas>
+      <div style="display:flex; gap:8px; margin-top:12px; justify-content:center; flex-wrap:wrap;">
+        <button id="btn-polaroid-toggle-filter" class="btn corrupt-btn">Toggle Filter</button>
+        <button id="btn-polaroid-download" class="btn">Download PNG</button>
+        <button id="btn-polaroid-close" class="btn">Close</button>
+      </div>
+      <div style="font-size:11px; opacity:0.9; margin-top:8px;">Filters: None · Sepia · Aged · Silver</div>
+    </div>
+  </div>
+
+  <div id="mobile-controls" class="mobile-controls hidden" aria-hidden="true">
+    <div class="action-btns">
+      <button class="m-btn b-btn" data-btn="B" aria-label="B">B</button>
+      <button class="m-btn a-btn" data-btn="A" aria-label="A">A</button>
+    </div>
+    <div class="center-btns">
+      <button class="m-btn s-btn select" data-btn="SELECT" aria-label="Select">Select</button>
+      <button class="m-btn s-btn start" data-btn="START" aria-label="Start">Start</button>
+    </div>
+    <div class="dpad">
+      <button class="m-btn up" data-btn="UP" aria-label="Up">&#9650;</button>
+      <button class="m-btn left" data-btn="LEFT" aria-label="Left">&#9664;</button>
+      <button class="m-btn right" data-btn="RIGHT" aria-label="Right">&#9654;</button>
+      <button class="m-btn down" data-btn="DOWN" aria-label="Down">&#9660;</button>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
